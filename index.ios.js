@@ -14,7 +14,8 @@ import {
   Dimensions,
   View,
   StatusBar,
-  ScrollView
+  ScrollView,
+  ListView
 } from 'react-native';
 
 let windowSize = Dimensions.get('window');
@@ -23,6 +24,7 @@ const {
   PropTypes
 } = React;
 
+import ParallaxScrollView from 'react-native-parallax-scroll-view';
 const GL = require("gl-react");
 const { Surface } = require("gl-react-native");
 
@@ -105,6 +107,8 @@ const Blur = GL.createComponent(({ width, height, factor, children }) =>
     displayName: "Blur"
   });
 
+const PARALLAX_HEADER_HEIGHT = 300;
+
 class reactblur extends Component {
 
   constructor(props) {
@@ -118,31 +122,71 @@ class reactblur extends Component {
   Blur(e) {
     let yOffset = e.nativeEvent.contentOffset.y * 0.025;
     
-    this.setState({animValue: yOffset});
+    this.setState({animValue: (yOffset >= 0) ? yOffset : 0 });
   }
 
   render() {
     return (
+
       <View style={styles.container}>
-        <View style={{position: 'absolute', top: 0, left: 0}}>
 
-          <Surface width={windowSize.width} height={300}>
-            <Blur factor={this.state.animValue}>
-              https://upload.wikimedia.org/wikipedia/commons/f/f3/Skyline_of_Toronto_viewed_from_Harbour_modified.png
-            </Blur>
-          </Surface>
+        <ScrollView
+          pagingEnabled={true}
+          horizontal={true}>
+            <View style={{ width: windowSize.width}}>
+              <ParallaxScrollView
+                backgroundColor="white"
+                contentBackgroundColor="white"
+                parallaxHeaderHeight={300}
+                scrollEventThrottle={16}
+                onScroll={(e) => this.Blur(e)}
+                renderBackground={() => (
+                  <View key="background">
+                    <Surface width={windowSize.width} height={PARALLAX_HEADER_HEIGHT}>
+                      <Blur factor={this.state.animValue}>
+                        https://upload.wikimedia.org/wikipedia/commons/f/f3/Skyline_of_Toronto_viewed_from_Harbour_modified.png
+                      </Blur>
+                    </Surface>
+                  </View>
+                 )}
+                renderForeground={() => (
+                  <View style={{ height: 300, flex: 1, alignItems: 'center', justifyContent: 'flex-end'}}>
+                    <Text style={{color: 'white', marginBottom: 20, fontSize: 14, fontWeight: '800'}}>Toronto!</Text>
+                  </View>
+                 )}
+              >
+                <View style={{ height: 500 }}>
+                  <Text>List of Content</Text>
+                </View>
+              </ParallaxScrollView>
+            </View>
+            <View style={{ width: windowSize.width}}>
+              <ParallaxScrollView
+                backgroundColor="white"
+                contentBackgroundColor="white"
+                parallaxHeaderHeight={300}
+                scrollEventThrottle={16}
+                onScroll={(e) => this.Blur(e)}
+                renderBackground={() => (
+                  <View key="background">
+                      <Image style={{width: windowSize.width, height: 300}} source={{uri: 'https://upload.wikimedia.org/wikipedia/commons/f/f3/Skyline_of_Toronto_viewed_from_Harbour_modified.png'}}/>
+                   </View>
+                  )}
+                  renderForeground={() => (
+                    <View style={{ height: 300, flex: 1, alignItems: 'center', justifyContent: 'flex-end'}}>
+                      <Text style={{color: 'white', marginBottom: 20, fontSize: 14, fontWeight: '800'}}>Toronto!</Text>
+                     </View>
+                  )}>
+                  <View style={{ height: 500 }}>
+                    <Text>hello</Text>
+                  </View>
+                </ParallaxScrollView>
+            </View>
+        </ScrollView>
 
-        </View>
-        <ScrollView scrollEventThrottle={16} onScroll={(e) => this.Blur(e)}>
-          <Text style={styles.instructions}>
-          To get started, edit index.ios.js
-        </Text>
-        <Text style={styles.instructions}>
-          Press Cmd+R to reload,{'\n'}
-          Cmd+D or shake for dev menu
-        </Text>
-          </ScrollView>
+
       </View>
+
 
     );
   }
@@ -151,9 +195,16 @@ class reactblur extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F5FCFF',
+  },
+  menu: {
+    width: windowSize.width,
+    height: 60,
+    opacity: 0.5,
+    backgroundColor: 'black',
+    position: 'absolute',
+    left: 0,
+    top: 0
   },
   welcome: {
     fontSize: 20,
