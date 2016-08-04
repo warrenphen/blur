@@ -89,9 +89,17 @@ const Blur1D = GL.createComponent(
 
 const Blur = GL.createComponent(({ width, height, factor, children }) =>
     <Blur1D width={width} height={height} direction={[ factor, 0 ]}>
-
-            {children}
-    
+      <Blur1D width={width} height={height} direction={[ 0, factor ]}>
+        <Blur1D width={width} height={height} direction={[ -factor/Math.sqrt(4), factor/Math.sqrt(4) ]}>
+          <Blur1D width={width} height={height} direction={[ factor/Math.sqrt(4), factor/Math.sqrt(4) ]}>
+            <Blur1D width={width} height={height} direction={[ -factor/Math.sqrt(8), factor/Math.sqrt(8) ]}>
+              <Blur1D width={width} height={height} direction={[ factor/Math.sqrt(8), factor/Math.sqrt(8) ]}>
+                {children}
+              </Blur1D>
+            </Blur1D>
+          </Blur1D>
+        </Blur1D>
+      </Blur1D>
     </Blur1D>
   , {
     displayName: "Blur"
@@ -107,8 +115,8 @@ class reactblur extends Component {
     }
   }
 
-  unBlur(e) {
-    let yOffset = e.nativeEvent.contentOffset.y * -0.025;
+  Blur(e) {
+    let yOffset = e.nativeEvent.contentOffset.y * 0.025;
     
     this.setState({animValue: yOffset});
   }
@@ -125,7 +133,7 @@ class reactblur extends Component {
           </Surface>
 
         </View>
-        <ScrollView scrollEventThrottle={16} onScroll={(e) => this.unBlur(e)}>
+        <ScrollView scrollEventThrottle={16} onScroll={(e) => this.Blur(e)}>
           <Text style={styles.instructions}>
           To get started, edit index.ios.js
         </Text>
